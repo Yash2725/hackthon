@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion VR | Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <!-- Luxury Navbar -->
+    <nav class="luxury-nav">
+        <div class="nav-container">
+            <div class="brand-logo">
+                <span class="vr-badge">VR</span>
+                FashionVR
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search designer brands...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="nav-links">
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-heart"></i> Wishlist</a>
+                <a href="#"><i class="fas fa-shopping-bag"></i> Bag</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="banner-content">
+            <h1>New Season Collection</h1>
+            <p>Try before you buy with our revolutionary VR technology</p>
+            <button class="cta-button">Start Virtual Try-On</button>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="categories">
+        <h2 class="section-title">Shop by Category</h2>
+        <div class="category-grid">
+            <div class="category-card" style="background-image: url('https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')">
+                <div class="category-overlay">
+                    <h3>Men's Fashion</h3>
+                    <button>Explore</button>
+                </div>
+            </div>
+            <div class="category-card" style="background-image: url('https://images.unsplash.com/photo-1581044777550-4cfa60707c03?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')">
+                <div class="category-overlay">
+                    <h3>Women's Couture</h3>
+                    <button>Explore</button>
+                </div>
+            </div>
+            <div class="category-card" style="background-image: url('https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')">
+                <div class="category-overlay">
+                    <h3>Accessories</h3>
+                    <button>Explore</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-products">
+        <h2 class="section-title">Trending Now <span class="vr-badge">VR Ready</span></h2>
+        <div class="product-grid">
+            <!-- Product 1 -->
+            <div class="product-card">
+                <div class="product-badge">New</div>
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Designer Jacket">
+                    <button class="quick-view" onclick="showVRPreview()">
+                        <i class="fas fa-vr-cardboard"></i> Quick VR Try-On
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3>Balenciaga Oversized Jacket</h3>
+                    <div class="price">₹24,999 <span class="original-price">₹34,999</span></div>
+                    <div class="rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(128)</span>
+                    </div>
+                    <button class="add-to-bag">Add to Bag</button>
+                </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card">
+                <div class="product-badge vr-exclusive">VR Exclusive</div>
+                <div class="product-image">
+                    <img src="https://assets.vogue.com/photos/66eda84bfaf34ef2cb0734c6/master/w_1920,c_limit/00008-gucci-spring-2025-ready-to-wear-credit-brand.jpg" alt="Evening Gown">
+                    <button class="quick-view" onclick="showVRPreview()"> 
+                        <i class="fas fa-vr-cardboard"></i> Quick VR Try-On
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3>Gucci Silk Evening Gown</h3>
+                    <div class="price">₹56,999</div>
+                    <div class="rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="far fa-star"></i>
+                        <span>(89)</span>
+                    </div>
+                    <button class="add-to-bag">Add to Bag</button>
+                </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Sneakers">
+                    <button class="quick-view" onclick="showVRPreview()">
+                        <i class="fas fa-vr-cardboard"></i> Quick VR Try-On
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3>Nike x Dior Air Jordan</h3>
+                    <div class="price">₹1,29,999</div>
+                    <div class="rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <span>(256)</span>
+                    </div>
+                    <button class="add-to-bag">Add to Bag</button>
+                </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="product-card">
+                <div class="product-badge">30% OFF</div>
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Men's Suit">
+                    <button class="quick-view" onclick="showVRPreview()">
+                        <i class="fas fa-vr-cardboard"></i> Quick VR Try-On
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3>Armani Slim-Fit Suit</h3>
+                    <div class="price">₹42,999 <span class="original-price">₹61,999</span></div>
+                    <div class="rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(172)</span>
+                    </div>
+                    <button class="add-to-bag">Add to Bag</button>
+                </div>
+            </div>
+
+            <!-- Product 5 -->
+            <div class="product-card">
+                <div class="product-badge">Bestseller</div>
+                <div class="product-image">
+                    <img src="https://i.pinimg.com/736x/f2/49/75/f24975172310b51906728fa45d402a28.jpg" alt="Prada Sunglasses">
+                    <button class="quick-view" onclick="showVRPreview()">
+                        <i class="fas fa-vr-cardboard"></i> Quick VR Try-On
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3>Prada Cat-Eye Sunglasses</h3>
+                    <div class="price">₹32,999</div>
+                    <div class="rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <span>(342)</span>
+                    </div>
+                    <button class="add-to-bag">Add to Bag</button>
+                </div>
+            </div>
+
+            <!-- Product 6 -->
+            <div class="product-card">
+                <div class="product-badge vr-exclusive">VR Exclusive</div>
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Leather Jacket">
+                    <button class="quick-view" onclick="showVRPreview()">
+                        <i class="fas fa-vr-cardboard"></i> Quick VR Try-On
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3>Balmain Biker Jacket</h3>
+                    <div class="price">₹89,999 <span class="original-price">₹1,12,000</span></div>
+                    <div class="rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span>(214)</span>
+                    </div>
+                    <button class="add-to-bag">Add to Bag</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VR Experience Section -->
+    <section class="vr-experience">
+        <div class="vr-content">
+            <div class="vr-text">
+                <h2>Your Personal Virtual Fitting Room</h2>
+                <p>See how clothes fit your unique body shape before purchasing. Our AI-powered VR technology gives you the confidence to shop online.</p>
+                <button class="cta-button">Launch VR Try-On</button>
+            </div>
+            <div class="vr-image">
+                <img src="https://images.unsplash.com/photo-1593508512255-86ab42a8e620?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" alt="VR Experience">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="luxury-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Fashion VR</h3>
+                <p>Revolutionizing online shopping through virtual reality technology.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">VR Technology</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect With Us</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-pinterest"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- VR Preview Modal -->
+    <div class="vr-modal" id="vrModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeVRPreview()">&times;</span>
+            <h2>Virtual Try-On</h2>
+            <div class="vr-viewport">
+                <div class="loading-animation">
+                    <div class="vr-loader"></div>
+                    <p>Preparing your virtual fitting room...</p>
+                </div>
+            </div>
+            <div class="vr-controls">
+                <button><i class="fas fa-tshirt"></i> Change Color</button>
+                <button><i class="fas fa-expand"></i> Fullscreen</button>
+                <button><i class="fas fa-arrows-alt"></i> Move Item</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Fitting Room | Fashion VR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary: #7B5BE6;
+            --primary-dark: #5E3DC1;
+            --gold: #FFD166;
+            --obsidian: #1A1A1A;
+            --ruby: #E63946;
+            --emerald: #2A9D8F;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vr-header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #777;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--ruby);
+        }
+
+        .flow-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Capture Options */
+        .capture-options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .capture-option {
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .capture-option.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .capture-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(123, 91, 230, 0.2);
+        }
+
+        /* Body Capture Section */
+        .body-capture-container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .camera-feed {
+            width: 100%;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+            aspect-ratio: 9/16;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #f0f0f0;
+            display: none;
+        }
+
+        .capture-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(123, 91, 230, 0.4);
+            transition: all 0.3s;
+        }
+
+        .capture-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .upload-btn {
+            background: var(--emerald);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px auto;
+        }
+
+        .upload-btn:hover {
+            background: #228176;
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        .instruction-steps {
+            text-align: left;
+            max-width: 400px;
+            margin: 0 auto 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .step {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+
+        /* Virtual Try-On Section */
+        .virtual-tryon {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .ar-container {
+            width: 100%;
+            height: 70vh;
+            background: #000;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .garment-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .control-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(123, 91, 230, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(123, 91, 230, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        /* New Elements */
+        .size-recommendation {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            z-index: 5;
+            backdrop-filter: blur(5px);
+        }
+
+        .size-badge {
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .size-guide-link {
+            font-size: 0.8rem;
+            text-decoration: underline;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .size-guide-link:hover {
+            opacity: 1;
+        }
+
+        .fabric-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .fabric-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .fabric-option.selected {
+            border-color: var(--gold);
+            transform: scale(1.1);
+        }
+
+        .color-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .color-option.selected {
+            border-color: var(--gold);
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 576px) {
+
+            .garment-controls,
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .ar-container {
+                height: 60vh;
+            }
+
+            .capture-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="vr-header">
+        <div class="logo">FashionVR</div>
+        <div class="close-btn" onclick="window.history.back()">
+            <i class="fas fa-times"></i>
+        </div>
+    </header>
+
+    <div class="flow-container">
+        <!-- Step 1: Body Capture -->
+        <div class="body-capture-container" id="bodyCapture">
+            <h2>Prepare Your Photo</h2>
+            <p class="instructions">Choose how you want to provide your photo for the virtual try-on</p>
+
+            <div class="capture-options">
+                <div class="capture-option active" id="cameraOption">
+                    <i class="fas fa-camera"></i> Take Photo
+                </div>
+                <div class="capture-option" id="uploadOption">
+                    <i class="fas fa-upload"></i> Upload Photo
+                </div>
+            </div>
+
+            <div class="camera-feed">
+                <video id="videoElement" autoplay playsinline></video>
+                <img id="uploadPreview" class="upload-preview">
+                <div class="loading-screen" id="cameraLoading">
+                    <div class="loader"></div>
+                    <p>Accessing camera...</p>
+                </div>
+            </div>
+
+            <div id="cameraControls">
+                <button class="capture-btn" id="captureBtn">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <p>Stand 2 meters away with good lighting</p>
+            </div>
+
+            <div id="uploadControls" style="display: none;">
+                <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                <button class="upload-btn" onclick="document.getElementById('photoUpload').click()">
+                    <i class="fas fa-folder-open"></i> Choose Photo
+                </button>
+                <button class="upload-btn" id="tryOutfitBtn" style="background: var(--gold);">
+                    <i class="fas fa-tshirt"></i> Try Outfit
+                </button>
+                <p>Upload a clear full-body photo</p>
+            </div>
+
+            <div class="instruction-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div>Stand straight against a plain background</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div>Wear fitted clothing for best results</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div>Ensure good lighting and full body visibility</div>
+                </div>
+            </div>
+
+            
+        </div>
+
+        <!-- Step 2: Virtual Try-On -->
+        <div class="virtual-tryon" id="virtualTryOn">
+            <h2>Virtual Fitting Room</h2>
+            <p>Your selected garment is now projected on your body</p>
+
+            <div class="ar-container">
+                <div class="loading-screen" id="arLoading">
+                    <div class="loader"></div>
+                    <p>Generating your virtual fit...</p>
+                </div>
+                <canvas id="arCanvas" style="display:none;"></canvas>
+                <img id="outfitResult" style="width:100%;height:100%;object-fit:contain;display:none;">
+            </div>
+
+            <div class="garment-controls">
+                <button class="control-btn active" data-action="rotate">
+                    <i class="fas fa-undo"></i> Rotate
+                </button>
+                <button class="control-btn" data-action="move">
+                    <i class="fas fa-arrows-alt"></i> Move
+                </button>
+                <button class="control-btn" data-action="zoom">
+                    <i class="fas fa-search"></i> Zoom
+                </button>
+            </div>
+
+            <div class="color-options" id="colorOptions">
+                <!-- Dynamically populated -->
+            </div>
+
+            <div class="fabric-controls" id="fabricControls">
+                <!-- Dynamically populated -->
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="saveOutfit">
+                    <i class="fas fa-save"></i> Save Fit
+                </button>
+                <button class="btn btn-outline" id="tryAnother">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+            </div>
+        </div>
+
+        <div id="debugPanel"
+            style="position:fixed; bottom:20px; left:20px; background:rgba(0,0,0,0.7); color:white; padding:10px; z-index:100; display:none;">
+            <h3>Debug Info</h3>
+            <div id="poseStatus">Pose: Not detected</div>
+            <button onclick="toggleDebug()">Toggle Debug View</button>
+            <canvas id="debugCanvas" width="300" height="400" style="border:1px solid red; margin-top:10px;"></canvas>
+        </div>
+    </div>
+
+    <script>
+       // Global Variables
+let poseDetector;
+const selectedProduct = {
+  image: 'https://example.com/garment.jpg',
+  colors: [
+    { name: 'Red', code: '#E63946' },
+    { name: 'Blue', code: '#1D3557' },
+    { name: 'Green', code: '#2A9D8F' }
+  ],
+  fabrics: [
+    { name: 'Cotton', effect: 1 },
+    { name: 'Silk', effect: 2 },
+    { name: 'Wool', effect: 0.5 }
+  ]
+};
+
+// DOM Elements
+const videoElement = document.getElementById('videoElement');
+const uploadPreview = document.getElementById('uploadPreview');
+const captureBtn = document.getElementById('captureBtn');
+const photoUpload = document.getElementById('photoUpload');
+const cameraOption = document.getElementById('cameraOption');
+const uploadOption = document.getElementById('uploadOption');
+const cameraControls = document.getElementById('cameraControls');
+const uploadControls = document.getElementById('uploadControls');
+const tryOutfitBtn = document.getElementById('tryOutfitBtn');
+const tryAnotherBtn = document.getElementById('tryAnother');
+const saveOutfitBtn = document.getElementById('saveOutfit');
+const bodyCapture = document.getElementById('bodyCapture');
+const virtualTryOn = document.getElementById('virtualTryOn');
+const arCanvas = document.getElementById('arCanvas');
+const outfitResult = document.getElementById('outfitResult');
+const colorOptions = document.getElementById('colorOptions');
+const fabricControls = document.getElementById('fabricControls');
+const debugCanvas = document.getElementById('debugCanvas');
+
+// Initialize the application
+function initApp() {
+  initCaptureOptions();
+  setupEventListeners();
+}
+
+// Initialize capture options (camera vs upload)
+function initCaptureOptions() {
+  cameraOption.addEventListener('click', async function() {
+    cameraOption.classList.add('active');
+    uploadOption.classList.remove('active');
+    cameraControls.style.display = 'block';
+    uploadControls.style.display = 'none';
+    videoElement.style.display = 'block';
+    uploadPreview.style.display = 'none';
+    
+    try {
+      document.getElementById('cameraLoading').style.display = 'flex';
+      await initCamera();
+      document.getElementById('cameraLoading').style.display = 'none';
+    } catch (err) {
+      document.getElementById('cameraLoading').style.display = 'none';
+      showError('Camera Error', 'Could not access camera. Please try again or upload a photo instead.');
+    }
+  });
+  
+  uploadOption.addEventListener('click', function() {
+    uploadOption.classList.add('active');
+    cameraOption.classList.remove('active');
+    cameraControls.style.display = 'none';
+    uploadControls.style.display = 'block';
+    videoElement.style.display = 'none';
+    uploadPreview.style.display = 'block';
+    
+    if (videoElement.srcObject) {
+      videoElement.srcObject.getTracks().forEach(track => track.stop());
+      videoElement.srcObject = null;
+    }
+  });
+}
+
+// Set up all event listeners
+function setupEventListeners() {
+  // Capture button
+  captureBtn.addEventListener('click', capturePhoto);
+  
+  // File upload
+  photoUpload.addEventListener('change', handleFileUpload);
+  
+  // Try outfit button
+  tryOutfitBtn.addEventListener('click', tryOnOutfit);
+  
+  // Try another button
+  tryAnotherBtn.addEventListener('click', resetFlow);
+  
+  // Save outfit button
+  saveOutfitBtn.addEventListener('click', saveOutfit);
+}
+
+// Initialize camera
+async function initCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'environment',
+        width: { ideal: 1080 },
+        height: { ideal: 1920 }
+      }
+    });
+    
+    const videoTrack = stream.getVideoTracks()[0];
+    const settings = videoTrack.getSettings();
+    
+    if (settings.width < 720 || settings.height < 1280) {
+      showWarning('Low Resolution', `For best results, use a higher resolution camera. Current: ${settings.width}x${settings.height}`);
+    }
+    
+    videoElement.srcObject = stream;
+    await initPoseDetection();
+  } catch (err) {
+    throw new Error("Camera access failed: " + err.message);
+  }
+}
+
+// Initialize pose detection
+async function initPoseDetection() {
+  try {
+    poseDetector = await poseDetection.createDetector(
+      poseDetection.SupportedModels.MoveNet,
+      {
+        modelType: poseDetection.movenet.modelType.SINGLEPOSE_THUNDER,
+        enableSmoothing: true
+      }
+    );
+  } catch (error) {
+    throw new Error("Pose detector failed to initialize: " + error.message);
+  }
+}
+
+// Capture photo from camera
+async function capturePhoto() {
+  const canvas = document.createElement('canvas');
+  canvas.width = videoElement.videoWidth;
+  canvas.height = videoElement.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+  const pose = await detectPose(canvas);
+  if (!pose) return;
+
+  proceedToVirtualTryOn(canvas, pose);
+}
+
+// Handle file upload
+function handleFileUpload(e) {
+  if (e.target.files && e.target.files[0]) {
+    const file = e.target.files[0];
+    
+    // Validate file
+    if (!file.type.match('image.*')) {
+      showError('Invalid File', 'Please upload an image file (JPEG, PNG, etc.)');
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      showError('File Too Large', 'Please upload an image smaller than 5MB');
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+      uploadPreview.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Try on outfit with uploaded photo
+async function tryOnOutfit() {
+  if (!uploadPreview.src || uploadPreview.src === '') {
+    showError('No Photo', 'Please upload a photo first');
+    return;
+  }
+
+  document.getElementById('arLoading').style.display = 'flex';
+  
+  try {
+    const canvas = document.createElement('canvas');
+    const img = new Image();
+    
+    img.onload = async function() {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      
+      const pose = await detectPose(canvas);
+      if (!pose) {
+        document.getElementById('arLoading').style.display = 'none';
+        return;
+      }
+      
+      proceedToVirtualTryOn(canvas, pose);
+    };
+    
+    img.src = uploadPreview.src;
+  } catch (error) {
+    document.getElementById('arLoading').style.display = 'none';
+    showError('Processing Error', 'Failed to process your photo. Please try another image.');
+  }
+}
+
+// Detect body pose in an image
+async function detectPose(canvas) {
+  try {
+    const downsampledCanvas = document.createElement('canvas');
+    downsampledCanvas.width = 640;
+    downsampledCanvas.height = 480;
+    const ctx = downsampledCanvas.getContext('2d');
+    ctx.drawImage(canvas, 0, 0, downsampledCanvas.width, downsampledCanvas.height);
+
+    const poses = await poseDetector.estimatePoses(downsampledCanvas);
+
+    if (poses.length === 0) {
+      showError('Pose Detection Failed', 'Could not detect a body pose. Ensure full body visibility and good lighting.');
+      return null;
+    }
+
+    // Check for required keypoints
+    const requiredKeypoints = ['left_shoulder', 'right_shoulder', 'left_hip', 'right_hip'];
+    const missing = requiredKeypoints.filter(k =>
+      !poses[0].keypoints.some(kp => kp.name === k && kp.score > 0.3)
+    );
+
+    if (missing.length > 0) {
+      showWarning('Partial Pose', `Couldn't detect ${missing.join(' and ')}. Adjust your position.`);
+      return null;
+    }
+
+    // Visualize pose for debugging
+    visualizePose(poses[0], canvas);
+
+    return {
+      leftShoulder: poses[0].keypoints.find(k => k.name === 'left_shoulder'),
+      rightShoulder: poses[0].keypoints.find(k => k.name === 'right_shoulder'),
+      leftHip: poses[0].keypoints.find(k => k.name === 'left_hip'),
+      rightHip: poses[0].keypoints.find(k => k.name === 'right_hip')
+    };
+  } catch (error) {
+    showError('Detection Error', 'An error occurred during pose detection. Please try again.');
+    return null;
+  }
+}
+
+// Visualize pose (for debugging)
+function visualizePose(pose, sourceCanvas) {
+  if (!debugCanvas) return;
+  
+  const debugCtx = debugCanvas.getContext('2d');
+  const scale = Math.min(300 / sourceCanvas.width, 400 / sourceCanvas.height);
+  
+  debugCanvas.width = sourceCanvas.width * scale;
+  debugCanvas.height = sourceCanvas.height * scale;
+  debugCtx.drawImage(sourceCanvas, 0, 0, debugCanvas.width, debugCanvas.height);
+
+  // Draw keypoints
+  pose.keypoints.forEach(kp => {
+    if (kp.score > 0.3) {
+      debugCtx.beginPath();
+      debugCtx.arc(kp.x * scale, kp.y * scale, 5, 0, 2 * Math.PI);
+      debugCtx.fillStyle = 'red';
+      debugCtx.fill();
+      debugCtx.fillText(kp.name, kp.x * scale + 8, kp.y * scale);
+    }
+  });
+
+  if (document.getElementById('poseStatus')) {
+    document.getElementById('poseStatus').textContent =
+      `Pose detected (${pose.keypoints.filter(k => k.score > 0.3).length}/17 points)`;
+  }
+}
+
+// Proceed to virtual try-on view
+function proceedToVirtualTryOn(bodyCanvas, pose) {
+  bodyCapture.style.display = 'none';
+  virtualTryOn.style.display = 'block';
+  
+  // Stop camera if running
+  if (videoElement.srcObject) {
+    videoElement.srcObject.getTracks().forEach(track => track.stop());
+    videoElement.srcObject = null;
+  }
+  
+  startVirtualTryOn(bodyCanvas, pose);
+}
+
+// Start virtual try-on process
+async function startVirtualTryOn(bodyCanvas, pose) {
+  const { width, height } = bodyCanvas;
+  arCanvas.width = width;
+  arCanvas.height = height;
+
+  const ctx = arCanvas.getContext('2d');
+  ctx.drawImage(bodyCanvas, 0, 0);
+
+  // Load garment image
+  const garmentImg = await loadImageWithRetry(selectedProduct.image, 3);
+  if (!garmentImg) {
+    showError('Load Error', 'Could not load garment image');
+    document.getElementById('arLoading').style.display = 'none';
+    return;
+  }
+
+  // Calculate measurements and position
+  const shoulderWidth = calculateDistance(pose.leftShoulder, pose.rightShoulder);
+  const torsoHeight = calculateDistance(
+    getMidpoint(pose.leftShoulder, pose.rightShoulder),
+    getMidpoint(pose.leftHip, pose.rightHip)
+  );
+
+  const scaleX = shoulderWidth * 1.1 / garmentImg.width;
+  const scaleY = torsoHeight * 1.3 / garmentImg.height;
+  const scale = Math.max(scaleX, scaleY);
+
+  const centerX = (pose.leftShoulder.x + pose.rightShoulder.x) / 2;
+  const centerY = (pose.leftShoulder.y + pose.rightShoulder.y) / 2 + (garmentImg.height * scale * 0.1);
+
+  // Set up rendering
+  let waveEffect = 1;
+  let currentColor = selectedProduct.colors[0].code;
+  let animationId;
+
+  // Initial render
+  renderGarment();
+  animate();
+
+  // Show size recommendation
+  showSizeRecommendation(calculateSize(shoulderWidth, torsoHeight));
+
+  // Set up controls
+  setupColorOptions();
+  setupFabricControls();
+  setupControlButtons();
+
+  // Hide loading
+  document.getElementById('arLoading').style.display = 'none';
+
+  function renderGarment() {
+    ctx.clearRect(0, 0, arCanvas.width, arCanvas.height);
+    ctx.drawImage(bodyCanvas, 0, 0);
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+
+    // Fabric simulation
+    const now = Date.now();
+    const waveIntensity = waveEffect + Math.sin(now / 300) * 0.5;
+
+    // Create clipping path
+    ctx.beginPath();
+    ctx.moveTo(-garmentImg.width * scale / 2, 0);
+    for (let y = 0; y < garmentImg.height; y += 10) {
+      const xOffset = Math.sin(y / 30 + now / 400) * waveIntensity;
+      ctx.lineTo((-garmentImg.width * scale / 2) + xOffset, y * scale);
+    }
+    ctx.lineTo(garmentImg.width * scale / 2, garmentImg.height * scale);
+    for (let y = garmentImg.height; y > 0; y -= 10) {
+      const xOffset = Math.cos(y / 30 + now / 400) * waveIntensity;
+      ctx.lineTo((garmentImg.width * scale / 2) + xOffset, y * scale);
+    }
+    ctx.closePath();
+    ctx.clip();
+
+    // Apply color
+    if (currentColor) {
+      ctx.fillStyle = currentColor;
+      ctx.globalCompositeOperation = 'source-atop';
+      ctx.fillRect(
+        -garmentImg.width * scale / 2,
+        0,
+        garmentImg.width * scale,
+        garmentImg.height * scale
+      );
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    // Draw garment
+    ctx.drawImage(
+      garmentImg,
+      -garmentImg.width * scale / 2,
+      0,
+      garmentImg.width * scale,
+      garmentImg.height * scale
+    );
+
+    ctx.restore();
+
+    // Update display
+    outfitResult.src = arCanvas.toDataURL();
+    outfitResult.style.display = 'block';
+    arCanvas.style.display = 'none';
+  }
+
+  function animate() {
+    renderGarment();
+    animationId = requestAnimationFrame(animate);
+  }
+
+  // Clean up on reset
+  tryAnotherBtn.addEventListener('click', () => {
+    cancelAnimationFrame(animationId);
+  });
+}
+
+// Helper functions
+function calculateDistance(point1, point2) {
+  return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+}
+
+function getMidpoint(point1, point2) {
+  return {
+    x: (point1.x + point2.x) / 2,
+    y: (point1.y + point2.y) / 2
+  };
+}
+
+async function loadImageWithRetry(url, maxRetries) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = url;
+      });
+      return img;
+    } catch (err) {
+      if (i === maxRetries - 1) throw err;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+}
+
+function calculateSize(shoulderWidth, torsoHeight) {
+  const bust = shoulderWidth * 2.5;
+  if (bust < 85) return 'XS';
+  if (bust < 90) return 'S';
+  if (bust < 95) return 'M';
+  if (bust < 100) return 'L';
+  return 'XL';
+}
+
+function showSizeRecommendation(size) {
+  const recommendation = document.createElement('div');
+  recommendation.className = 'size-recommendation';
+  recommendation.innerHTML = `
+    <div class="size-badge">Recommended Size: ${size}</div>
+    <div class="size-guide-link" onclick="showSizeGuide()">View Size Guide</div>
+  `;
+  document.querySelector('.ar-container').appendChild(recommendation);
+}
+
+function setupColorOptions() {
+  colorOptions.innerHTML = '';
+  selectedProduct.colors.forEach((color, index) => {
+    const colorOption = document.createElement('div');
+    colorOption.className = `color-option ${index === 0 ? 'selected' : ''}`;
+    colorOption.style.backgroundColor = color.code;
+    colorOption.title = color.name;
+    colorOption.addEventListener('click', function() {
+      document.querySelectorAll('.color-option').forEach(opt =>
+        opt.classList.remove('selected')
+      );
+      this.classList.add('selected');
+      currentColor = this.style.backgroundColor;
+    });
+    colorOptions.appendChild(colorOption);
+  });
+}
+
+function setupFabricControls() {
+  fabricControls.innerHTML = '';
+  selectedProduct.fabrics.forEach((fabric, index) => {
+    const fabricOption = document.createElement('div');
+    fabricOption.className = `fabric-option ${index === 0 ? 'selected' : ''}`;
+    fabricOption.textContent = fabric.name[0];
+    fabricOption.title = fabric.name;
+    fabricOption.style.backgroundColor = `hsl(${index * 120}, 70%, 50%)`;
+    fabricOption.addEventListener('click', function() {
+      document.querySelectorAll('.fabric-option').forEach(opt =>
+        opt.classList.remove('selected')
+      );
+      this.classList.add('selected');
+      waveEffect = fabric.effect;
+    });
+    fabricControls.appendChild(fabricOption);
+  });
+}
+
+function setupControlButtons() {
+  document.querySelectorAll('.control-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.control-btn').forEach(b =>
+        b.classList.remove('active')
+      );
+      this.classList.add('active');
+      
+      // In a full implementation, this would control garment manipulation
+      showInfo(`${this.dataset.action} Mode`, `Use touch or mouse to ${this.dataset.action} the garment`, 1500);
+    });
+  });
+}
+
+// UI Helper functions
+function showError(title, text) {
+  Swal.fire({
+    title: title,
+    text: text,
+    icon: 'error',
+    confirmButtonColor: 'var(--primary)'
+  });
+}
+
+function showWarning(title, text) {
+  Swal.fire({
+    title: title,
+    text: text,
+    icon: 'warning',
+    confirmButtonColor: 'var(--primary)'
+  });
+}
+
+function showInfo(title, text, timer = 1500) {
+  Swal.fire({
+    title: title,
+    text: text,
+    icon: 'info',
+    confirmButtonColor: 'var(--primary)',
+    timer: timer
+  });
+}
+
+function showSizeGuide() {
+  Swal.fire({
+    title: 'Size Guide',
+    html: `
+      <div style="text-align:left; margin-top:20px;">
+        <p><strong>XS:</strong> Bust < 85cm, Waist < 65cm, Hip < 90cm</p>
+        <p><strong>S:</strong> Bust 85-90cm, Waist 65-70cm, Hip 90-95cm</p>
+        <p><strong>M:</strong> Bust 90-95cm, Waist 70-75cm, Hip 95-100cm</p>
+        <p><strong>L:</strong> Bust 95-100cm, Waist 75-80cm, Hip 100-105cm</p>
+        <p><strong>XL:</strong> Bust > 100cm, Waist > 80cm, Hip > 105cm</p>
+      </div>
+    `,
+    confirmButtonColor: 'var(--primary)'
+  });
+}
+
+// Reset the application flow
+function resetFlow() {
+  document.getElementById('virtualTryOn').style.display = 'none';
+  document.getElementById('bodyCapture').style.display = 'block';
+  
+  // Reset file upload
+  photoUpload.value = '';
+  uploadPreview.src = '';
+  
+  // Reset camera if needed
+  if (videoElement.srcObject) {
+    videoElement.srcObject.getTracks().forEach(track => track.stop());
+    videoElement.srcObject = null;
+  }
+  
+  // Reinitialize camera if that option was selected
+  if (cameraOption.classList.contains('active')) {
+    initCamera();
+  }
+}
+
+// Save outfit result
+function saveOutfit() {
+  const link = document.createElement('a');
+  link.download = 'virtual-tryon-outfit.png';
+  link.href = outfitResult.src;
+  link.click();
+}
+
+// Toggle debug view
+function toggleDebug() {
+  const debugPanel = document.getElementById('debugPanel');
+  debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+}
+
+// Initialize the app when loaded
+window.addEventListener('load', initApp);
+
+    </script>
+</body>
+
+</html>
